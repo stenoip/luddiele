@@ -176,83 +176,98 @@
 </footer>
 
 <script>
-  var API_URL = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/api/tiles";
+var API_URL = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/api/tiles";
 
-  function fetchTiles(query) {
-    var url = API_URL + (query ? `?q=${encodeURIComponent(query)}` : "");
-    fetch(url)
-      .then(function(res) { return res.json(); })
-      .then(function(tiles) { renderTiles(tiles); })
-      .catch(function(err) {
-        console.error("Failed to fetch tiles:", err);
-      });
-  }
-
-  function renderTiles(tiles) {
-    var grid = document.getElementById("tileGrid");
-    grid.innerHTML = "";
-
-    tiles.forEach(function(tile) {
-      var div = document.createElement("div");
-      div.className = "tile " + tile.color;
-      div.innerHTML = `
-        <div class="tile-content" onclick="toggleFullscreen(this)">
-          <div class="content front">
-            <h1>@${tile.user}</h1>
-            <p>${tile.title}</p>
-          </div>
-          <div class="content back">
-            <div class="fs-user">@${tile.user}</div>
-            <div class="fs-time">${tile.timestamp}</div>
-            ${renderMedia(tile.media_filename)}
-            <p class="close-hint">Click title to collapse</p>
-          </div>
-        </div>
-      `;
-      grid.appendChild(div);
+function fetchTiles(query) {
+  var url = API_URL + (query ? "?q=" + encodeURIComponent(query) : "");
+  fetch(url, { credentials: 'omit' })
+    .then(function(res) {
+      console.log("API status:", res.status, "content-type:", res.headers.get("content-type"));
+      return res.text();
+    })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        renderTiles(data);
+      } catch (err) {
+        console.error("Response was not valid JSON. Raw response (first 2000 chars):");
+        console.error(text.slice(0, 2000));
+      }
+    })
+    .catch(function(err) {
+      console.error("Fetch failed:", err);
     });
+}
+
+// Example renderTiles stub — keep your existing renderTiles implementation
+function renderTiles(tiles) {
+  var grid = document.getElementById("tileGrid");
+  grid.innerHTML = "";
+  tiles.forEach(function(tile) {
+    var div = document.createElement("div");
+    div.className = "tile " + tile.color;
+    div.innerHTML = `
+      <div class="tile-content" onclick="toggleFullscreen(this)">
+        <div class="content front">
+          <h1>@${tile.user}</h1>
+          <p>${tile.title}</p>
+        </div>
+        <div class="content back">
+          <div class="fs-user">@${tile.user}</div>
+          <div class="fs-time">${tile.timestamp}</div>
+          ${renderMedia(tile.media_filename)}
+          <p class="close-hint">Click title to collapse</p>
+        </div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function renderMedia(filename) {
+  if (!filename) return "";
+  var ext = filename.split(".").pop().toLowerCase();
+  var src = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/static/uploads/" + filename;
+  if (["mp4", "mov", "webm"].indexOf(ext) !== -1) {
+    return '<video controls><source src="' + src + '"></video>';
+  } else if (["mp3", "wav", "ogg"].indexOf(ext) !== -1) {
+    return '<audio controls><source src="' + src + '"></audio>';
   }
+  return "";
+}
 
-  function renderMedia(filename) {
-    if (!filename) return "";
-    var ext = filename.split(".").pop().toLowerCase();
-    var src = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/static/uploads/" + filename;
-    if (["mp4", "mov", "webm"].includes(ext)) {
-      return `<video controls><source src="${src}"></video>`;
-    } else if (["mp3", "wav", "ogg"].includes(ext)) {
-      return `<audio controls><source src="${src}"></audio>`;
-    }
-    return "";
-  }
+// Keep your existing toggleFullscreen and collapse-on-title logic
+function toggleFullscreen(el) {
+  var tile = el.closest('.tile');
+  tile.classList.toggle('fullscreen');
+}
 
-  function toggleFullscreen(el) {
-    var tile = el.closest('.tile');
-    tile.classList.toggle('fullscreen');
-  }
+document.addEventListener("DOMContentLoaded", function() {
+  fetchTiles();
 
-  document.addEventListener("DOMContentLoaded", function() {
-    fetchTiles();
-
-    var searchForm = document.getElementById("searchForm");
+  var searchForm = document.getElementById("searchForm");
+  if (searchForm) {
     searchForm.addEventListener("submit", function(e) {
       e.preventDefault();
       var query = document.getElementById("searchInput").value.trim();
       fetchTiles(query);
     });
-  });
+  }
+});
 
-  // Collapse fullscreen tile when title is clicked
-  document.addEventListener("click", function(e) {
-    var title = e.target.closest(".tile .front h1");
-    if (title) {
-      var tile = title.closest(".tile");
-      if (tile.classList.contains("fullscreen")) {
-        tile.classList.remove("fullscreen");
-        e.stopPropagation();
-      }
+// Collapse fullscreen tile when title is clicked
+document.addEventListener("click", function(e) {
+  var title = e.target.closest(".tile .front h1");
+  if (title) {
+    var tile = title.closest(".tile");
+    if (tile.classList.contains("fullscreen")) {
+      tile.classList.remove("fullscreen");
+      e.stopPropagation();
     }
-  });
+  }
+});
 </script>
+
 
 </body>
 </html>
