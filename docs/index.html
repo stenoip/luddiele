@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Luddiele Audio/Video Sharing</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='luddiele.png') }}">
-  
+  <link rel="icon" type="image/png" href="static/luddiele.png">
   <style>
     body {
       margin: 0;
-      background: #008000; /* Plain green */
+      background: #008000;
       font-family: 'Segoe UI', sans-serif;
       color: #fff;
       overflow-x: hidden;
@@ -129,6 +128,12 @@
       color: #fff;
     }
 
+    textarea::placeholder,
+    input::placeholder {
+      color: #fff;
+      opacity: 1;
+    }
+
     input[type="submit"] {
       padding: 10px 20px;
       background: #0077cc;
@@ -144,100 +149,110 @@
       color: #aaa;
     }
 
-    /* Tile background colors */
     .blue .content { background-color: rgba(0, 159, 178, 0.6); }
     .red .content { background-color: rgba(213, 88, 44, 0.6); }
     .green .content { background-color: rgba(139, 186, 48, 0.6); }
     .royal_blue .content { background-color: rgba(56, 94, 130, 0.6); }
     .orange .content { background-color: rgba(242, 133, 76, 0.6); }
-    
-    textarea::placeholder,
-input::placeholder {
-  color: #fff;
-  opacity: 1; /* Ensures full visibility */
-}
-
   </style>
 </head>
 <body>
 
 <header>
-  <img src="{{ url_for('static', filename='luddiele.png') }}" alt="Wordtile Logo" style="height:150px; margin: 20px;">
-  <p style="text-align:center;">Logged in as <strong>@{{ username }}</strong> | <a href="/profile" style="color:#56bcf9;">Edit Profile</a></p>
+  <img src="static/luddiele.png" alt="Luddiele Logo" style="height:150px; margin: 20px;">
+  <p style="text-align:center;">Logged in as <strong>@guest</strong> | <a href="profile.html" style="color:#56bcf9;">Edit Profile</a></p>
 </header>
 
+<form id="searchForm" style="max-width:600px; margin:20px auto;">
+  <input type="text" id="searchInput" placeholder="Search tiles..." style="width:100%; padding:10px; font-size:1.1em;">
+</form>
 
-  <form action="/submit" method="post" enctype="multipart/form-data">
-    <textarea name="title" rows="1" placeholder="Title of your post" required></textarea>
-    <textarea name="content" rows="3" placeholder="What's on your mind?" required></textarea>
-    <select name="color">
-      {% for color in colors %}
-        <option value="{{ color }}">{{ color.replace('_', ' ').title() }}</option>
-      {% endfor %}
-    </select>
-    <input type="file" name="media_upload" accept="video/*,audio/*">
-    <input type="submit" value="Share">
-  </form>
+<div class="grid" id="tileGrid">
+  <!-- Tiles will be injected here -->
+</div>
 
-  <form action="/" method="get" style="max-width:600px; margin:20px auto;">
-    <input type="text" name="q" placeholder="Search tiles..." style="width:100%; padding:10px; font-size:1.1em;">
-  </form>
+<footer>
+  <p>&copy; 2025 Stenoip Company</p>
+</footer>
 
-  <div class="grid">
-    {% for tile in tiles %}
-      <div class="tile {{ tile.color }}">
+<script>
+  var API_URL = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/api/tiles";
+
+  function fetchTiles(query) {
+    var url = API_URL + (query ? `?q=${encodeURIComponent(query)}` : "");
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(tiles) { renderTiles(tiles); })
+      .catch(function(err) {
+        console.error("Failed to fetch tiles:", err);
+      });
+  }
+
+  function renderTiles(tiles) {
+    var grid = document.getElementById("tileGrid");
+    grid.innerHTML = "";
+
+    tiles.forEach(function(tile) {
+      var div = document.createElement("div");
+      div.className = "tile " + tile.color;
+      div.innerHTML = `
         <div class="tile-content" onclick="toggleFullscreen(this)">
           <div class="content front">
-            <h1>@{{ tile.user }}</h1>
-            <p>{{ tile.title }}</p>
+            <h1>@${tile.user}</h1>
+            <p>${tile.title}</p>
           </div>
           <div class="content back">
-            <div class="fs-user">@{{ tile.user }}</div>
-            <div class="fs-time">{{ tile.timestamp }}</div>
-            {% if tile.media_filename %}
-              {% if tile.media_filename.endswith('.mp4') or tile.media_filename.endswith('.mov') or tile.media_filename.endswith('.webm') %}
-                <video controls>
-                  <source src="{{ url_for('static', filename='uploads/' + tile.media_filename) }}">
-                </video>
-              {% elif tile.media_filename.endswith('.mp3') or tile.media_filename.endswith('.wav') or tile.media_filename.endswith('.ogg') %}
-                <audio controls>
-                  <source src="{{ url_for('static', filename='uploads/' + tile.media_filename) }}">
-                </audio>
-              {% endif %}
-            {% endif %}
-            {% if tile.user == username %}
-              <form action="/delete/{{ tile.id }}" method="post">
-                <button type="submit" class="delete-btn">Delete</button>
-              </form>
-            {% endif %}
+            <div class="fs-user">@${tile.user}</div>
+            <div class="fs-time">${tile.timestamp}</div>
+            ${renderMedia(tile.media_filename)}
             <p class="close-hint">Click title to collapse</p>
           </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+      `;
+      grid.appendChild(div);
+    });
+  }
 
-  <footer>
-    <p>&copy; 2025 Stenoip Company</p>
-  </footer>
+  function renderMedia(filename) {
+    if (!filename) return "";
+    var ext = filename.split(".").pop().toLowerCase();
+    var src = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/static/uploads/" + filename;
+    if (["mp4", "mov", "webm"].includes(ext)) {
+      return `<video controls><source src="${src}"></video>`;
+    } else if (["mp3", "wav", "ogg"].includes(ext)) {
+      return `<audio controls><source src="${src}"></audio>`;
+    }
+    return "";
+  }
 
- <script>
   function toggleFullscreen(el) {
-    const tile = el.closest('.tile');
+    var tile = el.closest('.tile');
     tile.classList.toggle('fullscreen');
   }
 
-  document.querySelectorAll('.tile .front h1').forEach(title => {
-    title.addEventListener('click', function(e) {
-      const tile = this.closest('.tile');
-      if (tile.classList.contains('fullscreen')) {
-        tile.classList.remove('fullscreen');
-        e.stopPropagation();
-      }
+  document.addEventListener("DOMContentLoaded", function() {
+    fetchTiles();
+
+    var searchForm = document.getElementById("searchForm");
+    searchForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      var query = document.getElementById("searchInput").value.trim();
+      fetchTiles(query);
     });
   });
-</script>
 
+  // Collapse fullscreen tile when title is clicked
+  document.addEventListener("click", function(e) {
+    var title = e.target.closest(".tile .front h1");
+    if (title) {
+      var tile = title.closest(".tile");
+      if (tile.classList.contains("fullscreen")) {
+        tile.classList.remove("fullscreen");
+        e.stopPropagation();
+      }
+    }
+  });
+</script>
 
 </body>
 </html>
