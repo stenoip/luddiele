@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Setup Profile</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='luddiele.png') }}">
+  
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      font-size: 1.2em;
+      margin-bottom: 15px;
+    }
+    input[type="submit"] {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Luddiele!</h1>
+  <form method="post">
+    <input type="text" name="username" placeholder="Enter your username" required><br>
+    <input type="text" name="profile_code" placeholder="Enter a profile code (optional)">
+    <br><br>
+    <input type="submit" value="Start Posting">
+  </form>
+</body>
+</html>

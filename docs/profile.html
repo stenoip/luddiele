@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Profile on Luddiele</title>
+   <link rel="icon" type="image/png" href="{{ url_for('static', filename='luddiele.png') }}">
+  
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      font-size: 1.2em;
+    }
+    input[type="submit"] {
+      padding: 10px 20px;
+      font-size: 1.2em;
+      background: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Edit Your Profile</h1>
+  <p>Current username: <strong>@{{ username }}</strong></p>
+  <p>Your profile code: <strong>{{ profile_code }}</strong></p>
+  <form method="post">
+    <input type="text" name="newname" placeholder="New username" required>
+    <br><br>
+    <input type="submit" value="Update">
+  </form>
+  <p><a href="/" style="color:#56bcf9;">Back to Feed</a></p>
+</body>
+</html>

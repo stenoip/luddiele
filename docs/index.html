@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Luddiele Audio/Video Sharing</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='luddiele.png') }}">
+  
+  <style>
+    body {
+      margin: 0;
+      background: #008000; /* Plain green */
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      justify-content: center;
+    }
+
+    .tile {
+      position: relative;
+      width: calc(33% - 20px);
+      min-width: 250px;
+      height: 200px;
+      perspective: 1000px;
+      cursor: pointer;
+      transition: transform 0.5s ease;
+    }
+
+    .tile-content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+    }
+
+    .tile.fullscreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 999;
+      transform: none;
+    }
+
+    .tile.fullscreen .tile-content {
+      transform: rotateY(180deg);
+    }
+
+    .content {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .front {
+      transform: rotateY(0deg);
+    }
+
+    .back {
+      transform: rotateY(180deg);
+    }
+
+    h1, p, .fs-user, .fs-time, .close-hint {
+      color: #fff;
+      margin: 0.5em 0;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.5em;
+    }
+
+    p {
+      font-size: 1.4em;
+    }
+
+    video, audio {
+      max-width: 100%;
+      margin-top: 10px;
+    }
+
+    .delete-btn {
+      margin-top: 10px;
+      background: #900;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    @media screen and (max-width: 768px) {
+      .tile {
+        width: 100%;
+      }
+    }
+
+    form {
+      margin: 20px auto;
+      max-width: 600px;
+    }
+
+    textarea, select, input[type="file"], input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    input[type="submit"] {
+      padding: 10px 20px;
+      background: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+
+    /* Tile background colors */
+    .blue .content { background-color: rgba(0, 159, 178, 0.6); }
+    .red .content { background-color: rgba(213, 88, 44, 0.6); }
+    .green .content { background-color: rgba(139, 186, 48, 0.6); }
+    .royal_blue .content { background-color: rgba(56, 94, 130, 0.6); }
+    .orange .content { background-color: rgba(242, 133, 76, 0.6); }
+    
+    textarea::placeholder,
+input::placeholder {
+  color: #fff;
+  opacity: 1; /* Ensures full visibility */
+}
+
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="{{ url_for('static', filename='luddiele.png') }}" alt="Wordtile Logo" style="height:150px; margin: 20px;">
+  <p style="text-align:center;">Logged in as <strong>@{{ username }}</strong> | <a href="/profile" style="color:#56bcf9;">Edit Profile</a></p>
+</header>
+
+
+  <form action="/submit" method="post" enctype="multipart/form-data">
+    <textarea name="title" rows="1" placeholder="Title of your post" required></textarea>
+    <textarea name="content" rows="3" placeholder="What's on your mind?" required></textarea>
+    <select name="color">
+      {% for color in colors %}
+        <option value="{{ color }}">{{ color.replace('_', ' ').title() }}</option>
+      {% endfor %}
+    </select>
+    <input type="file" name="media_upload" accept="video/*,audio/*">
+    <input type="submit" value="Share">
+  </form>
+
+  <form action="/" method="get" style="max-width:600px; margin:20px auto;">
+    <input type="text" name="q" placeholder="Search tiles..." style="width:100%; padding:10px; font-size:1.1em;">
+  </form>
+
+  <div class="grid">
+    {% for tile in tiles %}
+      <div class="tile {{ tile.color }}">
+        <div class="tile-content" onclick="toggleFullscreen(this)">
+          <div class="content front">
+            <h1>@{{ tile.user }}</h1>
+            <p>{{ tile.title }}</p>
+          </div>
+          <div class="content back">
+            <div class="fs-user">@{{ tile.user }}</div>
+            <div class="fs-time">{{ tile.timestamp }}</div>
+            {% if tile.media_filename %}
+              {% if tile.media_filename.endswith('.mp4') or tile.media_filename.endswith('.mov') or tile.media_filename.endswith('.webm') %}
+                <video controls>
+                  <source src="{{ url_for('static', filename='uploads/' + tile.media_filename) }}">
+                </video>
+              {% elif tile.media_filename.endswith('.mp3') or tile.media_filename.endswith('.wav') or tile.media_filename.endswith('.ogg') %}
+                <audio controls>
+                  <source src="{{ url_for('static', filename='uploads/' + tile.media_filename) }}">
+                </audio>
+              {% endif %}
+            {% endif %}
+            {% if tile.user == username %}
+              <form action="/delete/{{ tile.id }}" method="post">
+                <button type="submit" class="delete-btn">Delete</button>
+              </form>
+            {% endif %}
+            <p class="close-hint">Click title to collapse</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Stenoip Company</p>
+  </footer>
+
+ <script>
+  function toggleFullscreen(el) {
+    const tile = el.closest('.tile');
+    tile.classList.toggle('fullscreen');
+  }
+
+  document.querySelectorAll('.tile .front h1').forEach(title => {
+    title.addEventListener('click', function(e) {
+      const tile = this.closest('.tile');
+      if (tile.classList.contains('fullscreen')) {
+        tile.classList.remove('fullscreen');
+        e.stopPropagation();
+      }
+    });
+  });
+</script>
+
+
+</body>
+</html>
