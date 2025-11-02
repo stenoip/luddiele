@@ -2,272 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Luddiele Audio/Video Sharing</title>
-  <link rel="icon" type="image/png" href="static/luddiele.png">
+  <title>Redirecting to Luddiele...</title>
+  <meta http-equiv="refresh" content="5;url=https://sharri-wooziest-nonuniversally.ngrok-free.dev/">
   <style>
     body {
       margin: 0;
-      background: #008000;
+      background: #111;
+      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
-      color: #fff;
-      overflow-x: hidden;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    h1 {
+      z-index: 10;
+      font-size: 2em;
+      margin-bottom: 5px;
+    }
+
+    p {
+      z-index: 10;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #00B294;
+    }
+
+    .copyright {
+      position: absolute;
+      bottom: 10px;
+      font-size: 0.9em;
+      color: #aaa;
+      z-index: 10;
     }
 
     .grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
-      justify-content: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-auto-rows: 100px;
+      gap: 5px;
+      padding: 5px;
+      z-index: 1;
     }
 
     .tile {
-      position: relative;
-      width: calc(33% - 20px);
-      min-width: 250px;
-      height: 200px;
-      perspective: 1000px;
-      cursor: pointer;
-      transition: transform 0.5s ease;
+      perspective: 600px;
     }
 
-    .tile-content {
+    .tile-inner {
       width: 100%;
       height: 100%;
-      position: relative;
+      background: #0078D7;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transform-style: preserve-3d;
-      transition: transform 0.6s ease;
+      transition: transform 1s;
+      border-radius: 4px;
+      font-size: 1.2em;
     }
 
-    .tile.fullscreen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 999;
-      transform: none;
-    }
-
-    .tile.fullscreen .tile-content {
+    .tile.flip .tile-inner {
       transform: rotateY(180deg);
     }
 
-    .content {
+    .tile-inner::before,
+    .tile-inner::after {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
-      overflow-y: auto;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
+      justify-content: center;
+      font-weight: bold;
     }
 
-    .front {
-      transform: rotateY(0deg);
+    .tile-inner::before {
+      content: "Luddiele";
     }
 
-    .back {
+    .tile-inner::after {
+      content: "Share!";
       transform: rotateY(180deg);
     }
-
-    h1, p, .fs-user, .fs-time, .close-hint {
-      color: #fff;
-      margin: 0.5em 0;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 1.5em;
-    }
-
-    p {
-      font-size: 1.4em;
-    }
-
-    video, audio {
-      max-width: 100%;
-      margin-top: 10px;
-    }
-
-    .delete-btn {
-      margin-top: 10px;
-      background: #900;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-
-    @media screen and (max-width: 768px) {
-      .tile {
-        width: 100%;
-      }
-    }
-
-    form {
-      margin: 20px auto;
-      max-width: 600px;
-    }
-
-    textarea, select, input[type="file"], input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-
-    textarea::placeholder,
-    input::placeholder {
-      color: #fff;
-      opacity: 1;
-    }
-
-    input[type="submit"] {
-      padding: 10px 20px;
-      background: #0077cc;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 0.9em;
-      color: #aaa;
-    }
-
-    .blue .content { background-color: rgba(0, 159, 178, 0.6); }
-    .red .content { background-color: rgba(213, 88, 44, 0.6); }
-    .green .content { background-color: rgba(139, 186, 48, 0.6); }
-    .royal_blue .content { background-color: rgba(56, 94, 130, 0.6); }
-    .orange .content { background-color: rgba(242, 133, 76, 0.6); }
   </style>
 </head>
 <body>
+  <h1>Behold! Get ready for video/audio sharing</h1>
+  <p>Redirecting to Luddiele...</p>
+  <div class="grid" id="grid"></div>
+  <div class="copyright">© 2025 Stenoip Company. All rights reserved.</div>
 
-<header>
-  <img src="static/luddiele.png" alt="Luddiele Logo" style="height:150px; margin: 20px;">
-  <p style="text-align:center;">Logged in as <strong>@guest</strong> | <a href="profile.html" style="color:#56bcf9;">Edit Profile</a></p>
-</header>
+  <script>
+    const grid = document.getElementById("grid");
+    const colors = ["#0078D7", "#00B294", "#FFB900", "#D83B01", "#5C2D91", "#E81123", "#2D7D9A"];
 
-<form id="searchForm" style="max-width:600px; margin:20px auto;">
-  <input type="text" id="searchInput" placeholder="Search tiles..." style="width:100%; padding:10px; font-size:1.1em;">
-</form>
-
-<div class="grid" id="tileGrid">
-  <!-- Tiles will be injected here -->
-</div>
-
-<footer>
-  <p>&copy; 2025 Stenoip Company</p>
-</footer>
-
-<script>
-var API_URL = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/api/tiles";
-
-function fetchTiles(query) {
-  var url = API_URL + (query ? "?q=" + encodeURIComponent(query) : "");
-  fetch(url, { credentials: 'omit' })
-    .then(function(res) {
-      console.log("API status:", res.status, "content-type:", res.headers.get("content-type"));
-      return res.text();
-    })
-    .then(function(text) {
-      try {
-        var data = JSON.parse(text);
-        renderTiles(data);
-      } catch (err) {
-        console.error("Response was not valid JSON. Raw response (first 2000 chars):");
-        console.error(text.slice(0, 2000));
-      }
-    })
-    .catch(function(err) {
-      console.error("Fetch failed:", err);
-    });
-}
-
-// Example renderTiles stub — keep your existing renderTiles implementation
-function renderTiles(tiles) {
-  var grid = document.getElementById("tileGrid");
-  grid.innerHTML = "";
-  tiles.forEach(function(tile) {
-    var div = document.createElement("div");
-    div.className = "tile " + tile.color;
-    div.innerHTML = `
-      <div class="tile-content" onclick="toggleFullscreen(this)">
-        <div class="content front">
-          <h1>@${tile.user}</h1>
-          <p>${tile.title}</p>
-        </div>
-        <div class="content back">
-          <div class="fs-user">@${tile.user}</div>
-          <div class="fs-time">${tile.timestamp}</div>
-          ${renderMedia(tile.media_filename)}
-          <p class="close-hint">Click title to collapse</p>
-        </div>
-      </div>
-    `;
-    grid.appendChild(div);
-  });
-}
-
-function renderMedia(filename) {
-  if (!filename) return "";
-  var ext = filename.split(".").pop().toLowerCase();
-  var src = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/static/uploads/" + filename;
-  if (["mp4", "mov", "webm"].indexOf(ext) !== -1) {
-    return '<video controls><source src="' + src + '"></video>';
-  } else if (["mp3", "wav", "ogg"].indexOf(ext) !== -1) {
-    return '<audio controls><source src="' + src + '"></audio>';
-  }
-  return "";
-}
-
-// Keep your existing toggleFullscreen and collapse-on-title logic
-function toggleFullscreen(el) {
-  var tile = el.closest('.tile');
-  tile.classList.toggle('fullscreen');
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-  fetchTiles();
-
-  var searchForm = document.getElementById("searchForm");
-  if (searchForm) {
-    searchForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      var query = document.getElementById("searchInput").value.trim();
-      fetchTiles(query);
-    });
-  }
-});
-
-// Collapse fullscreen tile when title is clicked
-document.addEventListener("click", function(e) {
-  var title = e.target.closest(".tile .front h1");
-  if (title) {
-    var tile = title.closest(".tile");
-    if (tile.classList.contains("fullscreen")) {
-      tile.classList.remove("fullscreen");
-      e.stopPropagation();
+    for (let i = 0; i < 100; i++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      const inner = document.createElement("div");
+      inner.className = "tile-inner";
+      inner.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      tile.appendChild(inner);
+      grid.appendChild(tile);
     }
-  }
-});
-</script>
 
+    setInterval(() => {
+      const tiles = document.querySelectorAll(".tile");
+      const randomTile = tiles[Math.floor(Math.random() * tiles.length)];
+      randomTile.classList.toggle("flip");
+    }, 300);
 
+    setTimeout(() => {
+      window.location.href = "https://sharri-wooziest-nonuniversally.ngrok-free.dev/";
+    }, 5000);
+  </script>
 </body>
 </html>
